@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: langmind-file-generator
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: FILE_STORAGE_DIR
+        value: /tmp/generated_files
+      - key: FILE_TTL_SECONDS
+        value: "86400"

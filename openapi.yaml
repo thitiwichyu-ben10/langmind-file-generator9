@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: LangMind File Generator API
+  version: 1.1.0
+  description: Create downloadable DOCX, XLSX, PDF (HTML/Chromium) and PPTX files.
+servers:
+  - url: https://YOUR-SERVICE.onrender.com
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check API status
+      responses:
+        "200":
+          description: API is running
+  /create-file:
+    post:
+      operationId: createFile
+      summary: Create a file and return a download URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename, format, content]
+              properties:
+                filename:
+                  type: string
+                  example: quotation-2026.docx
+                format:
+                  type: string
+                  enum: [docx, xlsx, pdf, pptx]
+                content:
+                  type: string
+                  description: Markdown for DOCX, XLSX and PDF (rendered by Chromium); Markdown or JSON presentation spec for PPTX.
+      responses:
+        "200":
+          description: File created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  filename: {type: string}
+                  format: {type: string}
+                  download_url: {type: string, format: uri}
+                  expires_in_seconds: {type: integer}
+        "400":
+          description: Unsupported format
+        "413":
+          description: Content too large
+        "500":
+          description: File generation failed
+  /download/{file_id}:
+    get:
+      operationId: downloadFile
+      summary: Download generated file
+      parameters:
+        - name: file_id
+          in: path
+          required: true
+          schema: {type: string}
+      responses:
+        "200":
+          description: File download
+          content:
+            application/octet-stream:
+              schema: {type: string, format: binary}
+        "404":
+          description: File not found
+        "410":
+          description: Download link expired
